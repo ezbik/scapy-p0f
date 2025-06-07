@@ -450,15 +450,22 @@ def p0f_impersonate(pkt, osgenre=None, osdetails=None, signature=None,
 
     pkt = validate_packet(pkt)
 
+
     if not osgenre and not signature:
         raise ValueError("osgenre or signature is required to impersonate!")
 
     tcp = pkt[TCP]
     tcp_type = tcp.flags & (TCPFlag.SYN | TCPFlag.ACK)  # SYN / SYN+ACK
 
-    pkt_id=pkt.id
+    if pkt.version ==4:
+        pkt_id=pkt.id
+    elif pkt.version ==6:
+        try:
+            pkt_id=tcp.seq
+        except:
+            pkt_id='?'
 
-    if verbose==True: print(" [+ id:%s +] tcp flags:" % pkt_id, tcp_type ) 
+    if verbose==True: print(" [+ id: %s +] tcp flags:" % pkt_id, tcp_type ) 
 
     if signature:
         if isinstance(signature, string_types):
@@ -482,7 +489,7 @@ def p0f_impersonate(pkt, osgenre=None, osdetails=None, signature=None,
             raise ValueError("No match in the p0f database")
         sig = random.choice(sigs)
 
-    if verbose==True:   print(" [+ id:", pkt_id, " +] scapy dest signature: ", sig )
+    if verbose==True:   print(" [+ id:", pkt_id, "+] scapy dest signature: ", sig )
 
 
     if sig.ip_ver != -1 and pkt.version != sig.ip_ver:
@@ -529,7 +536,7 @@ def p0f_impersonate(pkt, osgenre=None, osdetails=None, signature=None,
         return val if isinstance(val, integer_types) else None
     orig_opts = dict(tcp.options)
 
-    if verbose==True:   print (" [+id:",pkt_id,"+] orig TCP options", orig_opts)
+    if verbose==True:   print (" [+ id:",pkt_id,"+] orig TCP options", orig_opts)
     if not orig_opts:
         raise ValueError("empty TCP options detected in original packet??")
 
