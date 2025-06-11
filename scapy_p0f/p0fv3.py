@@ -13,7 +13,7 @@ from scapy.layers.inet6 import IPv6
 from scapy.layers.http import HTTP, HTTPRequest, HTTPResponse
 from scapy.volatile import RandByte, RandShort, RandString
 from scapy.error import warning
-from scapy.modules.six import string_types, integer_types
+from scapy.libs.six import string_types, integer_types
 
 from scapy_p0f.utils import lparse
 from scapy_p0f.consts import MIN_TCP4, MIN_TCP6, MAX_DIST, WinType, TCPFlag
@@ -497,7 +497,7 @@ def p0f_impersonate(pkt, osgenre=None, osdetails=None, signature=None,
         raise ValueError("Can't convert between IPv4 and IPv6")
 
     quirks = sig.quirks
-    #print(" [+ id:%s +] scapy dest quirks: %s" % pkt.id, quirks)
+    #print(" [+ id:%s +] scapy dest quirks: %s" % pkt_id, quirks)
 
     if pkt.version == 4:
         pkt.ttl = sig.ttl - extrahops
@@ -544,10 +544,11 @@ def p0f_impersonate(pkt, osgenre=None, osdetails=None, signature=None,
     ws_hint = int_only(orig_opts.get("WScale"))
     ts_hint = [int_only(o) for o in orig_opts.get("Timestamp", (None, None))]
 
-    #if verbose==True:   print(" [+ id:",pkt_id,"+] Orig TCP Timestamp:", ts_hint )
+    if verbose==True:   print(" [+ id:",pkt_id,"+] Orig TCP Timestamp:", ts_hint )
     if verbose==True:   print(" [+ id:",pkt_id,"+] Orig MSS:", mss_hint )
 
     options = []
+
     for opt in sig.olayout.split(","):
         if opt == "mss":
             # MSS might have a maximum size because of WIN_TYPE_MSS
@@ -666,5 +667,7 @@ def p0f_impersonate(pkt, osgenre=None, osdetails=None, signature=None,
             pkt /= conf.raw_layer(load=RandString(random.randint(1, 10)))
     else:
         tcp.payload = NoPayload()
+
+    #print( 'final opts', pkt[TCP].options )
 
     return pkt
