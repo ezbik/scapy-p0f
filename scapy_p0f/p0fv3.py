@@ -557,11 +557,13 @@ def p0f_impersonate(pkt, osgenre=None, osdetails=None, signature=None,
             else:
                 maxmss = (2**16 - 1)
 
+            #print (f"=== sig.win_type {sig.win_type}, sig.win {sig.win}, sig.mss {sig.mss}, mss_hint {mss_hint}, maxmss {maxmss}")
             if sig.mss == -1:  # wildcard mss
                 if mss_hint and 0 <= mss_hint <= maxmss:
                     options.append(("MSS", mss_hint))
-                else:  # invalid hint, generate new value
-                    options.append(("MSS", random.randint(1, maxmss)))
+                else: 
+                    #options.append(("MSS", random.randint(1, maxmss))) # invalid hint, generate new value
+                    options.append(("MSS", maxmss))
             else:
                 options.append(("MSS", sig.mss))
 
